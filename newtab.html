@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HackerNews Top 100</title>
+  <link rel="stylesheet" href="newtab.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="Hackernews_logo.png" alt="HackerNews Logo">
+      <h1>HackerNews Top 100</h1>
+    </div>
+    <div class="controls">
+      <div class="search-container">
+        <input type="text" id="search" placeholder="Search stories...">
+      </div>
+      <div class="filter-container">
+        <select id="sort-by">
+          <option value="score">Sort by Score</option>
+          <option value="time">Sort by Newest</option>
+          <option value="title">Sort by Title</option>
+          <option value="comments">Sort by Comments</option>
+        </select>
+      </div>
+      <button id="refresh-btn" class="refresh-btn">Refresh</button>
+    </div>
+    <div class="meta-info">
+      <div class="last-updated">Last updated: <span id="last-updated-time">Loading...</span></div>
+      <div class="stats">
+        <span id="story-count">0</span> stories loaded
+      </div>
+    </div>
+  </header>
+  
+  <main>
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading HackerNews stories...</p>
+    </div>
+    <div id="error" class="error hidden">Failed to load stories. Please try again later.</div>
+    <div id="stories-grid" class="stories-grid hidden"></div>
+  </main>
+  
+  <footer>
+    <p>&copy; 2025 HackerNews Top 100 Extension</p>
+  </footer>
+  
+  <script src="newtab.js"></script>
+</body>
+</html>
