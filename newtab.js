@@ -7,6 +7,7 @@ const storyCountElement = document.getElementById('story-count');
 const searchInput = document.getElementById('search');
 const sortBySelect = document.getElementById('sort-by');
 const refreshBtn = document.getElementById('refresh-btn');
+const themeToggle = document.getElementById('theme-toggle');
 
 // Store stories in memory
 let stories = [];
@@ -14,7 +15,13 @@ let stories = [];
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
   try {
+    // Initialize theme
+    initializeTheme();
+    
+    // Load stories
     await loadStories();
+    
+    // Setup event listeners
     setupEventListeners();
   } catch (error) {
     console.error('Error initializing page:', error);
@@ -182,6 +189,11 @@ function setupEventListeners() {
       console.error('Error refreshing stories:', error);
     }
   });
+  
+  // Theme toggle
+  themeToggle.addEventListener('change', () => {
+    toggleTheme();
+  });
 }
 
 // Show loading state
@@ -230,4 +242,31 @@ async function getStoriesFromBackground() {
       }
     );
   });
+}
+
+// Theme management functions
+function initializeTheme() {
+  // Check if user has a saved theme preference
+  chrome.storage.local.get('theme', (result) => {
+    if (result.theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      themeToggle.checked = true;
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+      themeToggle.checked = false;
+    }
+  });
+}
+
+// Toggle between light and dark themes
+function toggleTheme() {
+  if (themeToggle.checked) {
+    // Switch to dark theme
+    document.documentElement.setAttribute('data-theme', 'dark');
+    chrome.storage.local.set({ theme: 'dark' });
+  } else {
+    // Switch to light theme
+    document.documentElement.setAttribute('data-theme', 'light');
+    chrome.storage.local.set({ theme: 'light' });
+  }
 }
