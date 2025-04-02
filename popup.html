@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HackerNews Top 100</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <h1>HackerNews Top 100</h1>
+    <div class="last-updated">Last updated: <span id="last-updated-time">Loading...</span></div>
+  </header>
+  
+  <div class="filters">
+    <input type="text" id="search" placeholder="Search stories...">
+    <select id="sort-by">
+      <option value="score">Score</option>
+      <option value="time">Newest</option>
+      <option value="title">Title</option>
+      <option value="comments">Comments</option>
+    </select>
+  </div>
+  
+  <div class="stories-container">
+    <div id="loading" class="loading">Loading stories...</div>
+    <div id="error" class="error hidden">Failed to load stories. Please try again later.</div>
+    <ul id="stories-list" class="stories-list hidden"></ul>
+  </div>
+  
+  <footer>
+    <div class="refresh-container">
+      <button id="refresh-btn">Refresh</button>
+    </div>
+    <div class="stats">
+      <span id="story-count">0</span> stories loaded
+    </div>
+  </footer>
+  
+  <!-- Load Appwrite configuration first -->
+  <script src="appwrite.js"></script>
+  <!-- Then load the popup script -->
+  <script src="popup.js"></script>
+</body>
+</html>
