@@ -174,14 +174,24 @@ function setupEventListeners() {
   // Sort select
   sortBySelect.addEventListener('change', filterStories);
   
-  // Refresh button
+  // Refresh button - fetch directly from HackerNews API
   refreshBtn.addEventListener('click', async () => {
     try {
-      // Request fresh data
+      showLoading();
+      console.log('Manually refreshing stories');
+      
+      // Request fresh data from HackerNews API via background script
       await chrome.runtime.sendMessage({ action: 'fetchNow' });
-      await loadStories();
+      
+      // Wait a moment for the background script to process and save the data
+      setTimeout(async () => {
+        // Reload stories from storage
+        await loadStories();
+        console.log('Stories refreshed successfully');
+      }, 1500);
     } catch (error) {
       console.error('Error refreshing stories:', error);
+      showError();
     }
   });
   
@@ -210,32 +220,58 @@ function showError() {
   storiesGrid.classList.add('hidden');
 }
 
-// Function to get stories from background script
+// Function to get stories from local storage or background script
 async function getStoriesFromBackground() {
   return new Promise((resolve, reject) => {
-    // Get today's date
-    const today = new Date().toISOString().split('T')[0];
-    
-    // Send message to background script
-    chrome.runtime.sendMessage(
-      {
-        action: 'getStories',
-        date: today
-      },
-      response => {
-        if (chrome.runtime.lastError) {
-          console.error('Error sending message:', chrome.runtime.lastError);
-          reject(chrome.runtime.lastError);
-        } else if (response && response.error) {
-          console.error('Error from background script:', response.error);
-          reject(response.error);
-        } else if (response && response.stories) {
-          resolve(response.stories);
-        } else {
-          reject(new Error('Invalid response from background script'));
-        }
+    // First try to get stories from local storage
+    chrome.storage.local.get(['stories', 'lastFetched'], (result) => {
+      if (chrome.runtime.lastError) {
+        console.error('Error accessing local storage:', chrome.runtime.lastError);
+        reject(chrome.runtime.lastError);
+        return;
       }
-    );
+      
+      // Check if we have stories and if they're relatively fresh (less than 3 hours old)
+      const now = Date.now();
+      const threeHoursInMs = 3 * 60 * 60 * 1000;
+      
+      if (result.stories && result.stories.length > 0 && 
+          result.lastFetched && (now - result.lastFetched < threeHoursInMs)) {
+        // Stories exist and are fresh, use them
+        console.log(`Using ${result.stories.length} stories from local storage`);
+        resolve(result.stories);
+      } else {
+        // Either no stories or they're old, fetch new ones
+        console.log('No recent stories in storage, requesting fresh data');
+        
+        // Request the background script to fetch fresh data
+        chrome.runtime.sendMessage(
+          { action: 'fetchNow' },
+          fetchResponse => {
+            if (chrome.runtime.lastError) {
+              console.error('Error requesting fresh data:', chrome.runtime.lastError);
+              // If we have old stories, better use them than nothing
+              if (result.stories && result.stories.length > 0) {
+                console.log('Using older stories from storage as fallback');
+                resolve(result.stories);
+              } else {
+                reject(chrome.runtime.lastError);
+              }
+            } else {
+              // After fetching, get the updated stories from storage
+              chrome.storage.local.get('stories', (freshResult) => {
+                if (freshResult.stories && freshResult.stories.length > 0) {
+                  console.log(`Got ${freshResult.stories.length} fresh stories`);
+                  resolve(freshResult.stories);
+                } else {
+                  reject(new Error('Failed to get fresh stories'));
+                }
+              });
+            }
+          }
+        );
+      }
+    });
   });
 }
 

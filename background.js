@@ -3,13 +3,13 @@
 
 console.log('Background script loaded successfully');
 
-// Set up alarm for hourly data fetching
+// Set up alarm for data fetching every 3 hours
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Extension installed, setting up alarm');
   // Fetch stories immediately
   fetchTopStories();
-  // Set up hourly alarm
-  chrome.alarms.create('fetchStories', { periodInMinutes: 60 });
+  // Set up alarm to refresh every 3 hours (180 minutes)
+  chrome.alarms.create('fetchStories', { periodInMinutes: 180 });
 });
 
 // Listen for alarm
@@ -61,7 +61,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // Function to fetch top stories from HackerNews API
 async function fetchTopStories() {
   try {
-    console.log('Fetching top stories from HackerNews');
+    console.log('Fetching top stories directly from HackerNews API');
     
     // HackerNews API endpoints
     const TOP_STORIES_URL = 'https://hacker-news.firebaseio.com/v0/topstories.json';
@@ -95,12 +95,13 @@ async function fetchTopStories() {
       fetchDate: today
     }));
     
-    // Store in local storage for now
-    chrome.storage.local.set({ stories: formattedStories, lastFetched: Date.now() }, () => {
+    // Store in Chrome's local storage
+    chrome.storage.local.set({ 
+      stories: formattedStories, 
+      lastFetched: Date.now() 
+    }, () => {
       console.log(`Successfully stored ${formattedStories.length} stories in local storage`);
     });
-    
-    // In a future version, we'll implement Appwrite storage here
     
     return formattedStories;
   } catch (error) {
