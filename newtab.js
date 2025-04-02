@@ -104,11 +104,6 @@ function renderStories(storiesToRender) {
             ${story.title}
           </a>
         </div>
-        <div class="story-preview">
-          <div class="story-preview-placeholder">
-            <div class="story-placeholder-icon">Y</div>
-          </div>
-        </div>
       </div>
       <div class="story-footer">
         <div class="story-stats">
